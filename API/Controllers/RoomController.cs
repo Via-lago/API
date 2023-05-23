@@ -1,7 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using API.Contracts;
 using API.Models;
+using API.ViewModels.Rooms;
 using Microsoft.AspNetCore.Mvc;
+using API.Utility;
+using API.ViewModels.Universities;
 
 namespace API.Controllers;
 
@@ -11,9 +14,13 @@ namespace API.Controllers;
 public class RoomController : ControllerBase
 {
     private readonly IRoomRepository _roomRepository;
-    public RoomController(IRoomRepository roomRepository)
+    private readonly IMapper<Room, RoomVM> _roomMapper;
+
+    public RoomController(IRoomRepository roomRepository, 
+        IMapper<Room, RoomVM> roomMapper)
     {
         _roomRepository = roomRepository;
+       _roomMapper = roomMapper;
     }
 
     [HttpGet]
@@ -24,8 +31,8 @@ public class RoomController : ControllerBase
         {
             return NotFound();
         }
-
-        return Ok(rooms);
+        var data = rooms.Select(_roomMapper.Map).ToList();
+        return Ok(data);
     }
 
     [HttpGet("{guid}")]
@@ -36,14 +43,17 @@ public class RoomController : ControllerBase
         {
             return NotFound();
         }
+        var data = _roomMapper.Map(room);
+        return Ok(data);
 
-        return Ok(room);
+        
     }
 
     [HttpPost]
-    public IActionResult Create(Room room)
+    public IActionResult Create(RoomVM roomVM)
     {
-        var result = _roomRepository.Create(room);
+        var roomConverted = _roomMapper.Map(roomVM);
+        var result = _roomRepository.Create(roomConverted);
         if (result is null)
         {
             return BadRequest();
@@ -53,9 +63,10 @@ public class RoomController : ControllerBase
     }
 
     [HttpPut]
-    public IActionResult Update(Room room)
+    public IActionResult Update(RoomVM roomVM)
     {
-        var isUpdated = _roomRepository.Update(room);
+        var roomConverted = _roomMapper.Map(roomVM);
+        var isUpdated = _roomRepository.Update(roomConverted);
         if (!isUpdated)
         {
             return BadRequest();

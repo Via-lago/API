@@ -1,7 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using API.Contracts;
 using API.Models;
+using API.ViewModels.Roles;
 using Microsoft.AspNetCore.Mvc;
+using API.ViewModels.Universities;
+using API.Utility;
+using System.Data;
+using API.ViewModels.Rooms;
 
 namespace API.Controllers;
 
@@ -10,9 +15,12 @@ namespace API.Controllers;
 public class RoleController : ControllerBase
 {
     private readonly IRoleRepository _roleRepository;
-    public RoleController(IRoleRepository roleRepository)
+    private readonly IMapper<Role, RolesVM> _mapper;
+    public RoleController(IRoleRepository roleRepository, 
+                           IMapper<Role, RolesVM> mapper)
     {
         _roleRepository = roleRepository;
+        _mapper = mapper;
     }
 
     [HttpGet]
@@ -23,8 +31,8 @@ public class RoleController : ControllerBase
         {
             return NotFound();
         }
-
-        return Ok(roles);
+        var data = roles.Select(_mapper.Map).ToList();
+        return Ok(data);
     }
 
     [HttpGet("{guid}")]
@@ -35,14 +43,15 @@ public class RoleController : ControllerBase
         {
             return NotFound();
         }
-
-        return Ok(role);
+        var data = _mapper.Map(role);
+        return Ok(data);
     }
 
     [HttpPost]
-    public IActionResult Create(Role role)
+    public IActionResult Create(RolesVM roleVM)
     {
-        var result = _roleRepository.Create(role);
+        var RoleConverted = _mapper.Map(roleVM);
+        var result = _roleRepository.Create(RoleConverted);
         if (result is null)
         {
             return BadRequest();
@@ -52,9 +61,10 @@ public class RoleController : ControllerBase
     }
 
     [HttpPut]
-    public IActionResult Update(Role role)
+    public IActionResult Update(RolesVM roleVM)
     {
-        var isUpdated = _roleRepository.Update(role);
+        var RoleConverted = _mapper.Map(roleVM);
+        var isUpdated = _roleRepository.Update(RoleConverted);
         if (!isUpdated)
         {
             return BadRequest();
@@ -71,7 +81,7 @@ public class RoleController : ControllerBase
         {
             return BadRequest();
         }
-
+        /*var data = _mapper.Map(isDeleted);*/
         return Ok();
     }
 
