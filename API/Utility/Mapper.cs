@@ -1,4 +1,5 @@
 ﻿using API.Contracts;
+using API.ViewModels.Accounts;
 using System.Reflection;
 
 namespace API.Utility
@@ -66,6 +67,11 @@ namespace API.Utility
 
             // Return the populated model
             return model;
+        }
+
+        public object Map(AccountEmployeeVM accountEmployeeVM)
+        {
+            throw new NotImplementedException();
         }
     }
 }

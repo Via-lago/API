@@ -4,6 +4,10 @@ using API.Models;
 using API.ViewModels.Employees;
 using Microsoft.AspNetCore.Mvc;
 using API.ViewModels.Universities;
+using API.Repositories;
+using API.ViewModels.Accounts;
+using System.Net.Mail;
+using System.Net;
 
 namespace API.Controllers;
 
@@ -13,12 +17,15 @@ namespace API.Controllers;
 public class EmployeeController : ControllerBase
 {
     private readonly IEmployeeRepository _emplloyeeRepository;
+    private readonly IAccountRepository _accountRepository;
     private readonly IMapper<Employee, EmployeeVM> _mapper;
     public EmployeeController(IEmployeeRepository employeeRepository,
-                                IMapper<Employee, EmployeeVM> mapper)
+                                IMapper<Employee, EmployeeVM> mapper,
+                                IAccountRepository accountRepository)
     {
         _emplloyeeRepository = employeeRepository;
         _mapper = mapper;
+        _accountRepository = accountRepository;
     }
 
     [HttpGet]
@@ -57,7 +64,6 @@ public class EmployeeController : ControllerBase
 
         return Ok(result);
     }
-
     [HttpPut]
     public IActionResult Update(EmployeeVM employeeVM)
     {
@@ -82,4 +88,5 @@ public class EmployeeController : ControllerBase
 
         return Ok();
     }
+
 }

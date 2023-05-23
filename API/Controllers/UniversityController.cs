@@ -47,7 +47,7 @@ public class UniversityController : ControllerBase
                 Code = university.Code,
                 Name = university.Name,
                 Educations = educationMapped
-            }; 
+            };
 
             results.Add(result);
         }

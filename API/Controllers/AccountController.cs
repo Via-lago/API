@@ -1,9 +1,11 @@
 ﻿using API.Contracts;
 using API.Models;
+using API.Repositories;
 using API.Utility;
 using API.ViewModels.Accounts;
-using API.ViewModels.Universities;
+
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Identity.Client;
 
 namespace API.Controllers;
 [ApiController]
@@ -12,11 +14,15 @@ public class AccountController : ControllerBase
 {
     private readonly IAccountRepository _genericRepository;
     private readonly IMapper<Account, AccountVM> _mapper;
+    private readonly IEmployeeRepository _employeeRepository;
+    
     public AccountController(IAccountRepository accountRepository,
-                            IMapper<Account, AccountVM> mapper)
+                            IMapper<Account, AccountVM> mapper,
+                            IEmployeeRepository employeeRepository)
     {
         _mapper = mapper;
         _genericRepository = accountRepository;
+        _employeeRepository = employeeRepository;
     }
 
     [HttpGet]
@@ -80,4 +86,38 @@ public class AccountController : ControllerBase
 
         return Ok();
     }
+
+    [HttpPost("ForgotPassword"+"{email}")]
+    public IActionResult UpdateResetPass(String email)
+    {
+
+        var getGuid = _employeeRepository.FindGuidByEmail(email);
+        if (getGuid == null)
+        {
+            return NotFound("Akun tidak ditemukan");
+        }
+
+        var isUpdated = _genericRepository.UpdateOTP(getGuid);
+
+        switch (isUpdated)
+        {
+            case 0:
+                return BadRequest();
+            default:
+                var hasil = new AccountEmployeeVM
+                {
+                    Email = email,
+                    Otp = isUpdated
+                };
+
+                MailService.Send("Kode OTP", "OTP anda adalah: " + isUpdated.ToString() + ".\n" +
+                        "Mohon kode OTP anda tidak diberikan kepada pihak lain" + ".\n" + "Terima kasih.", email);
+
+                return Ok(hasil);
+
+        }
+
+
+    }
+ 
 }

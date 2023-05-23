@@ -9,5 +9,5 @@ public class AccountVM
     public bool IsDeleted { get; set; }
     public int Otp { get; set; }
     public bool IsUsed { get; set; }
-    public DateTime ExpiredDate { get; set; }
+    public DateTime ExpiredTime { get; set; }
 }

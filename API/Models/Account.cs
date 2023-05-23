@@ -13,8 +13,8 @@ namespace API.Models
         public int Otp { get; set; }
         [Column("is_used")]
         public bool IsUsed { get; set; }
-        [Column("expired_date")]
-        public DateTime ExpiredDate { get; set; }
+        [Column("expired_time")]
+        public DateTime ExpiredTime { get; set; }
 
         //cardinality
         public Employee? Employee { get; set; }
