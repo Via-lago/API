@@ -1,89 +1,137 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using API.Contracts;
+﻿using API.Contracts;
 using API.Models;
 using API.ViewModels.Rooms;
 using Microsoft.AspNetCore.Mvc;
-using API.Utility;
-using API.ViewModels.Universities;
+using System;
+using API.Contracts;
+using API.Models;
+using API.Repositories;
+using API.ViewModels.Roles;
+using API.ViewModels.Rooms;
 
-namespace API.Controllers;
-
-[ApiController]
-[Route("api/[controller]")]
-
-public class RoomController : ControllerBase
+namespace WebAPI.Controllers
 {
-    private readonly IRoomRepository _roomRepository;
-    private readonly IMapper<Room, RoomVM> _roomMapper;
-
-    public RoomController(IRoomRepository roomRepository, 
-        IMapper<Room, RoomVM> roomMapper)
+    [ApiController]
+    [Route("api/[controller]")]
+    public class RoomController : ControllerBase
     {
-        _roomRepository = roomRepository;
-       _roomMapper = roomMapper;
-    }
-
-    [HttpGet]
-    public IActionResult GetAll()
-    {
-        var rooms = _roomRepository.GetAll();
-        if (!rooms.Any())
+        private readonly IRoomRepository _roomRepository;
+        private readonly IBookingRepository _bookingRepository;
+        private readonly IEmployeeRepository _employeeRepository;
+        private readonly IMapper<Room, RoomVM> _mapper;
+        public RoomController(IRoomRepository roomRepository, IMapper<Room, RoomVM> mapper, IBookingRepository bookingRepository, IEmployeeRepository employeeRepository)
         {
-            return NotFound();
-        }
-        var data = rooms.Select(_roomMapper.Map).ToList();
-        return Ok(data);
-    }
-
-    [HttpGet("{guid}")]
-    public IActionResult GetByGuid(Guid guid)
-    {
-        var room = _roomRepository.GetByGuid(guid);
-        if (room is null)
-        {
-            return NotFound();
-        }
-        var data = _roomMapper.Map(room);
-        return Ok(data);
-
-        
-    }
-
-    [HttpPost]
-    public IActionResult Create(RoomVM roomVM)
-    {
-        var roomConverted = _roomMapper.Map(roomVM);
-        var result = _roomRepository.Create(roomConverted);
-        if (result is null)
-        {
-            return BadRequest();
+            _roomRepository = roomRepository;
+            _mapper = mapper;
+            _bookingRepository = bookingRepository;
+            _employeeRepository = employeeRepository;
         }
 
-        return Ok(result);
-    }
-
-    [HttpPut]
-    public IActionResult Update(RoomVM roomVM)
-    {
-        var roomConverted = _roomMapper.Map(roomVM);
-        var isUpdated = _roomRepository.Update(roomConverted);
-        if (!isUpdated)
+        [HttpGet]
+        public IActionResult GetAll()
         {
-            return BadRequest();
+            var rooms = _roomRepository.GetAll();
+            if (!rooms.Any())
+            {
+                return NotFound();
+            }
+
+            var data = rooms.Select(_mapper.Map).ToList();
+            return Ok(data);
         }
 
-        return Ok();
-    }
-
-    [HttpDelete("{guid}")]
-    public IActionResult Delete(Guid guid)
-    {
-        var isDeleted = _roomRepository.Delete(guid);
-        if (!isDeleted)
+        [HttpGet("{guid}")]
+        public IActionResult GetByGuid(Guid guid)
         {
-            return BadRequest();
+            var room = _roomRepository.GetByGuid(guid);
+            if (room is null)
+            {
+                return NotFound();
+            }
+
+            var data = _mapper.Map(room);
+            return Ok(data);
         }
 
-        return Ok();
+        [HttpGet("CurrentlyUsedRooms")]
+        public IActionResult GetCurrentlyUsedRooms()
+        {
+            var room = _roomRepository.GetCurrentlyUsedRooms();
+            if (room is null)
+            {
+                return NotFound();
+            }
+
+            return Ok(room);
+        }
+
+        [HttpGet("CurrentlyUsedRoomsByDate")]
+        public IActionResult GetCurrentlyUsedRooms(DateTime dateTime)
+        {
+            var room = _roomRepository.GetByDate(dateTime);
+            if (room is null)
+            {
+                return NotFound();
+            }
+
+            return Ok(room);
+        }
+
+        [HttpPost]
+        public IActionResult Create(RoomVM roomVM)
+        {
+            var roomConverted = _mapper.Map(roomVM);
+            var result = _roomRepository.Create(roomConverted);
+            if (result is null)
+            {
+                return BadRequest();
+            }
+
+            return Ok(result);
+            return Ok(result);
+        }
+
+        [HttpPut]
+        public IActionResult Update(RoomVM roomVM)
+        {
+            var roomConverted = _mapper.Map(roomVM);
+            var isUpdated = _roomRepository.Update(roomConverted);
+            if (!isUpdated)
+            {
+                return BadRequest();
+            }
+
+            return Ok();
+        }
+
+        [HttpDelete("{guid}")]
+        public IActionResult Delete(Guid guid)
+        {
+            var isDeleted = _roomRepository.Delete(guid);
+            if (!isDeleted)
+            {
+                return BadRequest();
+            }
+
+            return Ok();
+        }
+
+
+        private string GetRoomStatus(Booking booking, DateTime dateTime)
+        {
+
+            if (booking.StartDate <= dateTime && booking.EndDate >= dateTime)
+            {
+                return "Occupied";
+            }
+            else if (booking.StartDate > dateTime)
+            {
+                return "Booked";
+            }
+            else
+            {
+                return "Available";
+            }
+        }
     }
 }

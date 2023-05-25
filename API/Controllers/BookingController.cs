@@ -32,15 +32,50 @@ public class BookingController : ControllerBase
         return Ok(data);
     }
 
-    [HttpGet("{guid}")]
-    public IActionResult GetByGuid(Guid guid)
+    [HttpGet("BookingDetail")]
+    public IActionResult GetAllBookingDetail()
     {
-        var booking = _bookingRepository.GetByGuid(guid);
+        try
+        {
+            var bookingDetails = _bookingRepository.GetAllBookingDetail();
+
+            return Ok(bookingDetails);
+
+        }
+        catch
+        {
+            return Ok("error");
+        }
+    }
+
+    [HttpGet("BookingDetailByGuid")]
+    public IActionResult GetDetailByGuid(Guid guid)
+    {
+        try
+        {
+            var booking = _bookingRepository.GetBookingDetailByGuid(guid);
+            if (booking is null)
+            {
+
+                return NotFound();
+            }
+
+            return Ok(booking);
+        }
+        catch
+        {
+            return Ok("error");
+        }
+    }
+    [HttpGet("{guid}")]
+    public IActionResult GetByGuid(Guid id)
+    {
+        var booking = _bookingRepository.GetByGuid(id);
         if (booking is null)
         {
             return NotFound();
         }
-        var data =_mapper.Map(booking);
+        var data = _mapper.Map(booking);
         return Ok(data);
     }
 
@@ -53,23 +88,20 @@ public class BookingController : ControllerBase
         {
             return BadRequest();
         }
-
         return Ok(result);
     }
-
     [HttpPut]
     public IActionResult Update(BookingVM bookingVM)
     {
         var bookingConverted = _mapper.Map(bookingVM);
-        var isUpdated = _bookingRepository.Update(bookingConverted);
-        if (!isUpdated)
+
+        var IsUpdate = _bookingRepository.Update(bookingConverted);
+        if (!IsUpdate)
         {
             return BadRequest();
         }
-
         return Ok();
     }
-
     [HttpDelete("{guid}")]
     public IActionResult Delete(Guid guid)
     {
@@ -78,8 +110,6 @@ public class BookingController : ControllerBase
         {
             return BadRequest();
         }
-
         return Ok();
     }
-
 }

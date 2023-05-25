@@ -12,5 +12,9 @@ namespace API.Repositories
         {
             return _context.Set<Education>().Where(e => e.UniversityGuid == universityId);
         }
+        public Education GetByEmployeeId(Guid employeeId)
+        {
+            return _context.Set<Education>().Find(employeeId);
+        }
     }
 }

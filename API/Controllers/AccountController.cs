@@ -3,7 +3,7 @@ using API.Models;
 using API.Repositories;
 using API.Utility;
 using API.ViewModels.Accounts;
-
+using API.ViewModels.Login;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Identity.Client;
 
@@ -12,7 +12,7 @@ namespace API.Controllers;
 [Route("api/[controller]")]
 public class AccountController : ControllerBase
 {
-    private readonly IAccountRepository _genericRepository;
+    private readonly IAccountRepository _accountRepository;
     private readonly IMapper<Account, AccountVM> _mapper;
     private readonly IEmployeeRepository _employeeRepository;
     
@@ -21,26 +21,26 @@ public class AccountController : ControllerBase
                             IEmployeeRepository employeeRepository)
     {
         _mapper = mapper;
-        _genericRepository = accountRepository;
+        _accountRepository = accountRepository;
         _employeeRepository = employeeRepository;
     }
 
     [HttpGet]
     public IActionResult GetAll()
     {
-        var account = _genericRepository.GetAll();
-        if (!account.Any())
+        var accounts = _accountRepository.GetAll();
+        if (!accounts.Any())
         {
             return NotFound();
         }
-        var data = account.Select(_mapper.Map).ToList();
+        var data = accounts.Select(_mapper.Map).ToList();
         return Ok(data);
     }
 
     [HttpGet("{guid}")]
     public IActionResult GetByGuid(Guid guid)
     {
-        var account = _genericRepository.GetByGuid(guid);
+        var account = _accountRepository.GetByGuid(guid);
         if (account is null)
         {
             return NotFound();
@@ -49,16 +49,58 @@ public class AccountController : ControllerBase
         return Ok(data);
     }
 
+    [HttpPost("Register")]
+
+    public IActionResult Register(RegisterVM registerVM)
+    {
+
+        var result = _accountRepository.Register(registerVM);
+        switch (result)
+        {
+            case 0:
+                return BadRequest("Registration failed");
+            case 1:
+                return BadRequest("Email already exists");
+            case 2:
+                return BadRequest("Phone number already exists");
+            case 3:
+                return Ok("Registration success");
+        }
+
+        return Ok();
+
+    }
+
+    [HttpPost("Login")]
+
+    public IActionResult Login(LoginVM loginVM)
+    {
+        var account = _accountRepository.Login(loginVM);
+        if (account == null)
+        {
+            return NotFound("Account Tidak Ditemukan");
+        }
+
+        if (account.Password != loginVM.Password)
+        {
+            return BadRequest("Password is invalid");
+        }
+
+        return Ok("Login Success");
+
+    }
+
+
     [HttpPost]
     public IActionResult Create(AccountVM accountVM)
     {
         var accountConverted = _mapper.Map(accountVM);
-        var result = _genericRepository.Create(accountConverted);
+
+        var result = _accountRepository.Create(accountConverted);
         if (result is null)
         {
             return BadRequest();
         }
-
         return Ok(result);
     }
 
@@ -66,7 +108,7 @@ public class AccountController : ControllerBase
     public IActionResult Update(AccountVM accountVM)
     {
         var accountConverted = _mapper.Map(accountVM);
-        var isUpdated = _genericRepository.Update(accountConverted);
+        var isUpdated = _accountRepository.Update(accountConverted);
         if (!isUpdated)
         {
             return BadRequest();
@@ -75,19 +117,32 @@ public class AccountController : ControllerBase
         return Ok();
     }
 
-    [HttpDelete("{guid}")]
-    public IActionResult Delete(Guid guid)
+    [HttpPost("ChangePassword")]
+    public IActionResult ChangePassword(ChangePasswordVM changePasswordVM)
     {
-        var isDeleted = _genericRepository.Delete(guid);
-        if (!isDeleted)
+        // Cek apakah email dan OTP valid
+        var account = _employeeRepository.FindGuidByEmail(changePasswordVM.Email);
+        var changePass = _accountRepository.ChangePasswordAccount(account, changePasswordVM);
+        switch (changePass)
         {
-            return BadRequest();
+            case 0:
+                return BadRequest("");
+            case 1:
+                return Ok("Password has been changed successfully");
+            case 2:
+                return BadRequest("Invalid OTP");
+            case 3:
+                return BadRequest("OTP has already been used");
+            case 4:
+                return BadRequest("OTP expired");
+            case 5:
+                return BadRequest("Wrong Password No Same");
+            default:
+                return BadRequest();
         }
 
-        return Ok();
     }
-
-    [HttpPost("ForgotPassword"+"{email}")]
+    [HttpPost("ForgotPassword" + "{email}")]
     public IActionResult UpdateResetPass(String email)
     {
 
@@ -97,7 +152,7 @@ public class AccountController : ControllerBase
             return NotFound("Akun tidak ditemukan");
         }
 
-        var isUpdated = _genericRepository.UpdateOTP(getGuid);
+        var isUpdated = _accountRepository.UpdateOTP(getGuid);
 
         switch (isUpdated)
         {
@@ -118,10 +173,18 @@ public class AccountController : ControllerBase
                            .Send();
 
                 return Ok(hasil);
+        }
+    }
 
+    [HttpDelete("{guid}")]
+    public IActionResult Delete(Guid guid)
+    {
+        var isDeleted = _accountRepository.Delete(guid);
+        if (!isDeleted)
+        {
+            return BadRequest();
         }
 
-
+        return Ok();
     }
- 
 }
