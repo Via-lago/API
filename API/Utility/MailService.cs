@@ -3,36 +3,62 @@ using System.Net;
 
 namespace API.Utility
 {
+    public class Message
+    {
+        public string Subject { get; set; }
+        public string Body { get; set; }
+        public string Email { get; set; }
+    }
+
     public class MailService
     {
-        public static void Send(string subject, string body, string email)
+        private Message message;
+        private SmtpClient smtpClient;
+
+        public MailService()
         {
-            // Set the Papercut SMTP server settings
-            string smtpServer = "localhost";
-            int smtpPort = 25;
-
-            MailMessage message = new MailMessage
-            {
-                From = new MailAddress("sender@example.com"),
-                Subject = subject,
-                Body = body
-            };
-            message.To.Add(email);
-
-            // Create a SmtpClient and configure it to use Papercut
-            SmtpClient smtpClient = new SmtpClient(smtpServer, smtpPort)
+            message = new Message();
+            smtpClient = new SmtpClient("localhost", 25)
             {
                 DeliveryMethod = SmtpDeliveryMethod.Network,
                 EnableSsl = false,
                 UseDefaultCredentials = false,
                 Credentials = new NetworkCredential("", "") // No authentication required for Papercut
             };
+        }
 
-            // Send the email
-            smtpClient.Send(message);
+        public MailService WithSubject(string subject)
+        {
+            message.Subject = subject;
+            return this;
+        }
+
+        public MailService WithBody(string body)
+        {
+            message.Body = body;
+            return this;
+        }
+
+        public MailService WithEmail(string email)
+        {
+            message.Email = email;
+            return this;
+        }
+
+        public void Send()
+        {
+            MailMessage mailMessage = new MailMessage
+            {
+                From = new MailAddress("sender@example.com"),
+                Subject = message.Subject,
+                Body = message.Body,
+            };
+            mailMessage.To.Add(message.Email);
+
+            smtpClient.Send(mailMessage);
 
             // Clean up resources
-            message.Dispose();
+            mailMessage.Dispose();
             smtpClient.Dispose();
         }
     }

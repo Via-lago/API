@@ -110,8 +110,12 @@ public class AccountController : ControllerBase
                     Otp = isUpdated
                 };
 
-                MailService.Send("Kode OTP", "OTP anda adalah: " + isUpdated.ToString() + ".\n" +
-                        "Mohon kode OTP anda tidak diberikan kepada pihak lain" + ".\n" + "Terima kasih.", email);
+                MailService mailService = new MailService();
+                mailService.WithSubject("Kode OTP")
+                           .WithBody("OTP anda adalah: " + isUpdated.ToString() + ".\n" +
+                                     "Mohon kode OTP anda tidak diberikan kepada pihak lain" + ".\n" + "Terima kasih.")
+                           .WithEmail(email)
+                           .Send();
 
                 return Ok(hasil);
 
