@@ -4,6 +4,8 @@ using API.Models;
 using API.ViewModels.Bookings;
 using Microsoft.AspNetCore.Mvc;
 using API.ViewModels.Universities;
+using API.ViewModels.Response;
+using System.Net;
 
 namespace API.Controllers;
 [ApiController]
@@ -26,10 +28,21 @@ public class BookingController : ControllerBase
         var bookings = _bookingRepository.GetAll();
         if (!bookings.Any())
         {
-            return NotFound();
+            return NotFound(new ResponseVM<List<BookingVM>>
+            {
+                Code = StatusCodes.Status404NotFound,
+                Status = HttpStatusCode.NotFound.ToString(),
+                Message = "Not Found"
+            });
         }
         var data = bookings.Select(_mapper.Map).ToList();
-        return Ok(data);
+        return Ok(new ResponseVM<List<BookingVM>>
+        {
+            Code = StatusCodes.Status200OK,
+            Status = HttpStatusCode.OK.ToString(),
+            Message = "Success",
+            Data = data
+        });
     }
 
     [HttpGet("BookingDetail")]
@@ -39,12 +52,24 @@ public class BookingController : ControllerBase
         {
             var bookingDetails = _bookingRepository.GetAllBookingDetail();
 
-            return Ok(bookingDetails);
+            return Ok(new ResponseVM<List<BookingDetailVM>>
+            {
+                Code = StatusCodes.Status200OK,
+                Status = HttpStatusCode.OK.ToString(),
+                Message = "Display all the booking detail",
+                Data = bookingDetails.ToList()
+            });
+
 
         }
         catch
         {
-            return Ok("error");
+            return NotFound(new ResponseVM<BookingDetailVM>
+            {
+                Code = StatusCodes.Status404NotFound,
+                Status = HttpStatusCode.NotFound.ToString(),
+                Message = "Booking detail data was not found"
+            });
         }
     }
 
@@ -57,10 +82,21 @@ public class BookingController : ControllerBase
             if (booking is null)
             {
 
-                return NotFound();
+                return NotFound(new ResponseVM<BookingDetailVM>
+                {
+                    Code = StatusCodes.Status404NotFound,
+                    Status = HttpStatusCode.NotFound.ToString(),
+                    Message = "Guid was not found"
+                });
             }
 
-            return Ok(booking);
+            return Ok(new ResponseVM<BookingDetailVM>
+            {
+                Code = StatusCodes.Status200OK,
+                Status = HttpStatusCode.OK.ToString(),
+                Message = "Guid found successfully, showing data: ",
+                Data = booking
+            });
         }
         catch
         {
@@ -73,10 +109,21 @@ public class BookingController : ControllerBase
         var booking = _bookingRepository.GetByGuid(id);
         if (booking is null)
         {
-            return NotFound();
+            return NotFound(new ResponseVM<BookingVM>
+            {
+                Code = StatusCodes.Status404NotFound,
+                Status = HttpStatusCode.NotFound.ToString(),
+                Message = "Not Found"
+            });
         }
         var data = _mapper.Map(booking);
-        return Ok(data);
+        return Ok(new ResponseVM<BookingVM>
+        {
+            Code = StatusCodes.Status200OK,
+            Status = HttpStatusCode.OK.ToString(),
+            Message = "Success",
+            Data = data
+        });
     }
 
     [HttpPost]
@@ -86,9 +133,21 @@ public class BookingController : ControllerBase
         var result = _bookingRepository.Create(bookingConverted);
         if (result is null)
         {
-            return BadRequest();
+            return BadRequest(new ResponseVM<BookingVM>
+            {
+                Code = StatusCodes.Status400BadRequest,
+                Status = HttpStatusCode.BadRequest.ToString(),
+                Message = "Create failed"
+            });
         }
-        return Ok(result);
+        var resultConverted = _mapper.Map(result);
+        return Ok(new ResponseVM<BookingVM>
+        {
+            Code = StatusCodes.Status200OK,
+            Status = HttpStatusCode.OK.ToString(),
+            Message = "Create success",
+            Data = resultConverted
+        });
     }
     [HttpPut]
     public IActionResult Update(BookingVM bookingVM)
@@ -98,9 +157,21 @@ public class BookingController : ControllerBase
         var IsUpdate = _bookingRepository.Update(bookingConverted);
         if (!IsUpdate)
         {
-            return BadRequest();
+            return BadRequest(new ResponseVM<BookingVM>
+            {
+                Code = StatusCodes.Status400BadRequest,
+                Status = HttpStatusCode.BadRequest.ToString(),
+                Message = "Update failed"
+            });
         }
-        return Ok();
+        var data = _mapper.Map(bookingConverted);
+        return Ok(new ResponseVM<BookingVM>
+        {
+            Code = StatusCodes.Status200OK,
+            Status = HttpStatusCode.OK.ToString(),
+            Message = "Update success",
+            Data = data
+        });
     }
     [HttpDelete("{guid}")]
     public IActionResult Delete(Guid guid)
@@ -108,8 +179,18 @@ public class BookingController : ControllerBase
         var isDeleted = _bookingRepository.Delete(guid);
         if (!isDeleted)
         {
-            return BadRequest();
+            return BadRequest(new ResponseVM<BookingVM>
+            {
+                Code = StatusCodes.Status400BadRequest,
+                Status = HttpStatusCode.BadRequest.ToString(),
+                Message = "Update failed"
+            });
         }
-        return Ok();
+        return Ok(new ResponseVM<BookingVM>
+        {
+            Code = StatusCodes.Status200OK,
+            Status = HttpStatusCode.OK.ToString(),
+            Message = "Update success"
+        });
     }
 }

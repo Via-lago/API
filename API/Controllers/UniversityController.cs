@@ -2,9 +2,12 @@
 using API.Models;
 using API.Repositories;
 using API.Utility;
+using API.ViewModels.Accounts;
 using API.ViewModels.Educations;
+using API.ViewModels.Response;
 using API.ViewModels.Universities;
 using Microsoft.AspNetCore.Mvc;
+using System.Net;
 
 namespace API.Controllers;
 
@@ -25,48 +28,28 @@ public class UniversityController : ControllerBase
         _educationMapper = educationMapper;
     }
 
-
-    [HttpGet("WithEducation")]
-    public IActionResult GetAllWithEducation()
-    {
-        var universities = _universityRepository.GetAll();
-        if (!universities.Any())
-        {
-            return NotFound();
-        }
-
-        var results = new List<UniversityEducationVM>();
-        foreach (var university in universities)
-        {
-            var education = _educationRepository.GetByUniversityId(university.Guid);
-            var educationMapped = education.Select(EducationsVM.ToVM);
-
-            var result = new UniversityEducationVM
-            {
-                Guid = university.Guid,
-                Code = university.Code,
-                Name = university.Name,
-                Educations = educationMapped
-            };
-
-            results.Add(result);
-        }
-
-        return Ok(results);
-    }
-
-
     [HttpGet]
     public IActionResult GetAll()
     {
         var universities = _universityRepository.GetAll();
         if (!universities.Any())
         {
-            return NotFound();
+            return NotFound(new ResponseVM<List<UniversityVM>>
+            {
+                Code = StatusCodes.Status404NotFound,
+                Status = HttpStatusCode.NotFound.ToString(),
+                Message = "Not Found"
+            });
         }
         var data = universities.Select(_mapper.Map).ToList();
 
-        return Ok(data);
+        return Ok(new ResponseVM<List<UniversityVM>>
+        {
+            Code = StatusCodes.Status200OK,
+            Status = HttpStatusCode.OK.ToString(),
+            Message = "Success",
+            Data = data
+        });
     }
 
     [HttpGet("{guid}")]
@@ -74,11 +57,20 @@ public class UniversityController : ControllerBase
     {
         var university = _universityRepository.GetByGuid(guid);
         if (university is null)
-        {
-            return NotFound();
-        }
+            return NotFound(new ResponseVM<UniversityVM>
+            {
+                Code = StatusCodes.Status404NotFound,
+                Status = HttpStatusCode.NotFound.ToString(),
+                Message = "Not Found"
+            });
         var data = _mapper.Map(university);
-        return Ok(data);
+        return Ok(new ResponseVM<UniversityVM>
+        {
+            Code = StatusCodes.Status200OK,
+            Status = HttpStatusCode.OK.ToString(),
+            Message = "Success",
+            Data = data
+        });
     }
 
     [HttpPost]
@@ -89,10 +81,22 @@ public class UniversityController : ControllerBase
         var result = _universityRepository.Create(universityConverted);
         if (result is null)
         {
-            return BadRequest();
+            return BadRequest(new ResponseVM<UniversityVM>
+            {
+                Code = StatusCodes.Status400BadRequest,
+                Status = HttpStatusCode.BadRequest.ToString(),
+                Message = "Create failed"
+            });
         }
 
-        return Ok(result);
+        var resultConverted = _mapper.Map(result);
+        return Ok(new ResponseVM<UniversityVM>
+        {
+            Code = StatusCodes.Status200OK,
+            Status = HttpStatusCode.OK.ToString(),
+            Message = "Create success",
+            Data = resultConverted
+        });
     }
 
     [HttpPut]
@@ -102,21 +106,43 @@ public class UniversityController : ControllerBase
         var isUpdated = _universityRepository.Update(universityConverted);
         if (!isUpdated)
         {
-            return BadRequest();
+            return BadRequest(new ResponseVM<UniversityVM>
+            {
+                Code = StatusCodes.Status400BadRequest,
+                Status = HttpStatusCode.BadRequest.ToString(),
+                Message = "Update failed"
+            });
         }
 
-        return Ok();
+        var data = _mapper.Map(universityConverted);
+        return Ok(new ResponseVM<UniversityVM>
+        {
+            Code = StatusCodes.Status200OK,
+            Status = HttpStatusCode.OK.ToString(),
+            Message = "Update success",
+            Data = data
+        });
     }
 
-    [HttpDelete("{guid}")]
+        [HttpDelete("{guid}")]
     public IActionResult Delete(Guid guid)
     {
         var isDeleted = _universityRepository.Delete(guid);
         if (!isDeleted)
         {
-            return BadRequest();
+            return BadRequest(new ResponseVM<UniversityVM>
+            {
+                Code = StatusCodes.Status400BadRequest,
+                Status = HttpStatusCode.BadRequest.ToString(),
+                Message = "Update failed"
+            });
         }
 
-        return Ok();
+        return Ok(new ResponseVM<UniversityVM>
+        {
+            Code = StatusCodes.Status200OK,
+            Status = HttpStatusCode.OK.ToString(),
+            Message = "Update success"
+        });
     }
 }

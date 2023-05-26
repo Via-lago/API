@@ -3,8 +3,10 @@ using API.Models;
 using API.Repositories;
 using API.Utility;
 using API.ViewModels.AccountRole;
+using API.ViewModels.Response;
 using API.ViewModels.Universities;
 using Microsoft.AspNetCore.Mvc;
+using System.Net;
 
 namespace API.Controllers;
 [ApiController]
@@ -26,10 +28,21 @@ public class AccountRoleController : ControllerBase
         var accountrole = _accountroleRepository.GetAll();
         if (!accountrole.Any())
         {
-            return NotFound();
+            return NotFound(new ResponseVM<List<AccountRoleVM>>
+            {
+                Code = StatusCodes.Status404NotFound,
+                Status = HttpStatusCode.NotFound.ToString(),
+                Message = "Not Found"
+            });
         }
         var data = accountrole.Select(_mapper.Map).ToList();
-        return Ok(data);
+        return Ok(new ResponseVM<List<AccountRoleVM>>
+        {
+            Code = StatusCodes.Status200OK,
+            Status = HttpStatusCode.OK.ToString(),
+            Message = "Success",
+            Data = data
+        });
     }
 
     [HttpGet("{guid}")]
@@ -38,10 +51,21 @@ public class AccountRoleController : ControllerBase
         var accountrole = _accountroleRepository.GetByGuid(guid);
         if (accountrole is null)
         {
-            return NotFound();
+            return NotFound(new ResponseVM<AccountRoleVM>
+            {
+                Code = StatusCodes.Status404NotFound,
+                Status = HttpStatusCode.NotFound.ToString(),
+                Message = "Not Found"
+            });
         }
         var data = _mapper.Map(accountrole);
-        return Ok(data);
+        return Ok(new ResponseVM<AccountRoleVM>
+        {
+            Code = StatusCodes.Status200OK,
+            Status = HttpStatusCode.OK.ToString(),
+            Message = "Success",
+            Data = data
+        });
     }
 
     [HttpPost]
@@ -51,10 +75,21 @@ public class AccountRoleController : ControllerBase
         var result = _accountroleRepository.Create(AccountRoleConverted);
         if (result is null)
         {
-            return BadRequest();
+            return BadRequest(new ResponseVM<AccountRoleVM>
+            {
+                Code = StatusCodes.Status400BadRequest,
+                Status = HttpStatusCode.BadRequest.ToString(),
+                Message = "Create failed"
+            });
         }
-
-        return Ok(result);
+        var resultConverted = _mapper.Map(result);
+        return Ok(new ResponseVM<AccountRoleVM>
+        {
+            Code = StatusCodes.Status200OK,
+            Status = HttpStatusCode.OK.ToString(),
+            Message = "Create success",
+            Data = resultConverted
+        });
     }
 
     [HttpPut]
@@ -64,10 +99,22 @@ public class AccountRoleController : ControllerBase
         var isUpdated = _accountroleRepository.Update(AccountRoleConverted);
         if (!isUpdated)
         {
-            return BadRequest();
+            return BadRequest(new ResponseVM<AccountRoleVM>
+            {
+                Code = StatusCodes.Status400BadRequest,
+                Status = HttpStatusCode.BadRequest.ToString(),
+                Message = "Update failed"
+            });
         }
 
-        return Ok();
+        var data = _mapper.Map(AccountRoleConverted);
+        return Ok(new ResponseVM<AccountRoleVM>
+        {
+            Code = StatusCodes.Status200OK,
+            Status = HttpStatusCode.OK.ToString(),
+            Message = "Update success",
+            Data = data
+        });
     }
 
     [HttpDelete("{guid}")]
@@ -76,10 +123,20 @@ public class AccountRoleController : ControllerBase
         var isDeleted = _accountroleRepository.Delete(guid);
         if (!isDeleted)
         {
-            return BadRequest();
+            return BadRequest(new ResponseVM<AccountRoleVM>
+            {
+                Code = StatusCodes.Status400BadRequest,
+                Status = HttpStatusCode.BadRequest.ToString(),
+                Message = "Update failed"
+            });
         }
 
-        return Ok();
+        return Ok(new ResponseVM<AccountRoleVM>
+        {
+            Code = StatusCodes.Status200OK,
+            Status = HttpStatusCode.OK.ToString(),
+            Message = "Update success"
+        });
     }
 }
 

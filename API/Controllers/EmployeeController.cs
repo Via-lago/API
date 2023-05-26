@@ -12,6 +12,8 @@ using API.ViewModels.Accounts;
 using System.Net.Mail;
 using System.Net;
 using API.Repositories;
+using API.ViewModels.Response;
+using API.ViewModels.Rooms;
 
 namespace API.Controllers;
 
@@ -44,11 +46,20 @@ public class EmployeeController : ControllerBase
         var masterEmployees = _emplloyeeRepository.GetAllMasterEmployee();
         if (!masterEmployees.Any())
         {
-            return NotFound();
+            return NotFound(new ResponseVM<List<MasterEmployeeVM>>
+            {
+                Code = StatusCodes.Status404NotFound,
+                Status = HttpStatusCode.NotFound.ToString(),
+                Message = "Not Found"
+            });
         }
-
-        return Ok(masterEmployees);
-    }
+        return Ok(new ResponseVM<List<MasterEmployeeVM>>
+        {
+            Code = StatusCodes.Status200OK,
+            Status = HttpStatusCode.OK.ToString(),
+            Message = "Success"
+        });
+   }
 
     [HttpGet("GetMasterEmployeeByGuid")]
     public IActionResult GetMasterEmployeeByGuid(Guid guid)
@@ -56,25 +67,22 @@ public class EmployeeController : ControllerBase
         var masterEmployees = _emplloyeeRepository.GetMasterEmployeeByGuid(guid);
         if (masterEmployees is null)
         {
-            return NotFound();
+            return NotFound(new ResponseVM<MasterEmployeeVM>
+            {
+                Code = StatusCodes.Status404NotFound,
+                Status = HttpStatusCode.NotFound.ToString(),
+                Message = "Not Found"
+            });
         }
 
-        return Ok(masterEmployees);
-    }
-
-
-
-/*    [HttpGet]
-    public IActionResult GetAll()
-    {
-        var employees = _emplloyeeRepository.GetAll();
-        if (!employees.Any())
+        return Ok(new ResponseVM<MasterEmployeeVM>
         {
-            return NotFound();
-        }
-        var data = employees.Select(_mapper.Map).ToList();
-        return Ok(data);
-    }*/
+            Code = 200,
+            Status = "OK",
+            Message = "Employee Found",
+            Data = masterEmployees
+        });
+    }
 
     [HttpGet("{guid}")]
     public IActionResult GetByGuid(Guid guid)
@@ -82,10 +90,21 @@ public class EmployeeController : ControllerBase
         var employee = _emplloyeeRepository.GetByGuid(guid);
         if (employee is null)
         {
-            return NotFound();
+            return NotFound(new ResponseVM<EmployeeVM>
+            {
+                Code = StatusCodes.Status404NotFound,
+                Status = HttpStatusCode.NotFound.ToString(),
+                Message = "Not Found"
+            });
         }
         var data = _mapper.Map(employee);
-        return Ok(employee);
+        return Ok(new ResponseVM<EmployeeVM>
+        {
+            Code = StatusCodes.Status200OK,
+            Status = HttpStatusCode.OK.ToString(),
+            Message = "Success",
+            Data = data
+        });
     }
 
     [HttpPost]
@@ -95,10 +114,21 @@ public class EmployeeController : ControllerBase
         var result = _emplloyeeRepository.Create(employeeConverted);
         if (result is null)
         {
-            return BadRequest();
+            return BadRequest(new ResponseVM<EmployeeVM>
+            {
+                Code = StatusCodes.Status400BadRequest,
+                Status = HttpStatusCode.BadRequest.ToString(),
+                Message = "Create failed"
+            });
         }
-
-        return Ok(result);
+        var resultConverted = _mapper.Map(result);
+        return Ok(new ResponseVM<EmployeeVM>
+        {
+            Code = StatusCodes.Status200OK,
+            Status = HttpStatusCode.OK.ToString(),
+            Message = "Create success",
+            Data = resultConverted
+        });
     }
     [HttpPut]
     public IActionResult Update(EmployeeVM employeeVM)
@@ -107,10 +137,22 @@ public class EmployeeController : ControllerBase
         var isUpdated = _emplloyeeRepository.Update(employeeConverted);
         if (!isUpdated)
         {
-            return BadRequest();
+            return BadRequest(new ResponseVM<EmployeeVM>
+            {
+                Code = StatusCodes.Status400BadRequest,
+                Status = HttpStatusCode.BadRequest.ToString(),
+                Message = "Update failed"
+            });
         }
 
-        return Ok();
+        var data = _mapper.Map(employeeConverted);
+        return Ok(new ResponseVM<EmployeeVM>
+        {
+            Code = StatusCodes.Status200OK,
+            Status = HttpStatusCode.OK.ToString(),
+            Message = "Update success",
+            Data = data
+        });
     }
 
     [HttpDelete("{guid}")]
@@ -119,10 +161,20 @@ public class EmployeeController : ControllerBase
         var isDeleted = _emplloyeeRepository.Delete(guid);
         if (!isDeleted)
         {
-            return BadRequest();
+            return BadRequest(new ResponseVM<EmployeeVM>
+            {
+                Code = StatusCodes.Status400BadRequest,
+                Status = HttpStatusCode.BadRequest.ToString(),
+                Message = "Update failed"
+            });
         }
 
-        return Ok();
+        return Ok(new ResponseVM<UniversityVM>
+        {
+            Code = StatusCodes.Status200OK,
+            Status = HttpStatusCode.OK.ToString(),
+            Message = "Update success"
+        });
     }
 
 }

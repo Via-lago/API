@@ -2,8 +2,10 @@
 using API.Models;
 using API.Utility;
 using API.ViewModels.Educations;
+using API.ViewModels.Response;
 using API.ViewModels.Universities;
 using Microsoft.AspNetCore.Mvc;
+using System.Net;
 
 namespace API.Controllers;
 
@@ -26,10 +28,21 @@ public class EducationController : ControllerBase
         var educations = _educationRepository.GetAll();
         if (!educations.Any())
         {
-            return NotFound();
+            return NotFound(new ResponseVM<List<EducationsVM>>
+            {
+                Code = StatusCodes.Status404NotFound,
+                Status = HttpStatusCode.NotFound.ToString(),
+                Message = "Not Found"
+            });
         }
         var data = educations.Select(_educationMapper.Map).ToList();
-        return Ok(educations);
+        return Ok(new ResponseVM<List<EducationsVM>>
+        {
+            Code = StatusCodes.Status200OK,
+            Status = HttpStatusCode.OK.ToString(),
+            Message = "Success",
+            Data = data
+        });
     }
 
     [HttpGet("{guid}")]
@@ -38,10 +51,21 @@ public class EducationController : ControllerBase
         var education = _educationRepository.GetByGuid(guid);
         if (education is null)
         {
-            return NotFound();
+            return NotFound(new ResponseVM<EducationsVM>
+            {
+                Code = StatusCodes.Status404NotFound,
+                Status = HttpStatusCode.NotFound.ToString(),
+                Message = "Not Found"
+            });
         }
         var data = _educationMapper.Map(education);
-        return Ok(data);
+        return Ok(new ResponseVM<EducationsVM>
+        {
+            Code = StatusCodes.Status200OK,
+            Status = HttpStatusCode.OK.ToString(),
+            Message = "Success",
+            Data = data
+        });
     }
 
     [HttpPost]
@@ -51,10 +75,22 @@ public class EducationController : ControllerBase
         var result = _educationRepository.Create(educationConverted);
         if (result is null)
         {
-            return BadRequest();
+            return BadRequest(new ResponseVM<EducationsVM>
+            {
+                Code = StatusCodes.Status400BadRequest,
+                Status = HttpStatusCode.BadRequest.ToString(),
+                Message = "Create failed"
+            });
         }
 
-        return Ok(result);
+        var resultConverted = _educationMapper.Map(result);
+        return Ok(new ResponseVM<EducationsVM>
+        {
+            Code = StatusCodes.Status200OK,
+            Status = HttpStatusCode.OK.ToString(),
+            Message = "Create success",
+            Data = resultConverted
+        });
     }
 
     [HttpPut]
@@ -64,10 +100,22 @@ public class EducationController : ControllerBase
         var isUpdated = _educationRepository.Update(educationConverted);
         if (!isUpdated)
         {
-            return BadRequest();
+            return BadRequest(new ResponseVM<EducationsVM>
+            {
+                Code = StatusCodes.Status400BadRequest,
+                Status = HttpStatusCode.BadRequest.ToString(),
+                Message = "Update failed"
+            });
         }
 
-        return Ok();
+        var data = _educationMapper.Map(educationConverted);
+        return Ok(new ResponseVM<EducationsVM>
+        {
+            Code = StatusCodes.Status200OK,
+            Status = HttpStatusCode.OK.ToString(),
+            Message = "Update success",
+            Data = data
+        });
     }
 
     [HttpDelete("{guid}")]
@@ -76,9 +124,19 @@ public class EducationController : ControllerBase
         var isDeleted = _educationRepository.Delete(guid);
         if (!isDeleted)
         {
-            return BadRequest();
+            return BadRequest(new ResponseVM<EducationsVM>
+            {
+                Code = StatusCodes.Status400BadRequest,
+                Status = HttpStatusCode.BadRequest.ToString(),
+                Message = "Update failed"
+            });
         }
 
-        return Ok();
+        return Ok(new ResponseVM<EducationsVM>
+        {
+            Code = StatusCodes.Status200OK,
+            Status = HttpStatusCode.OK.ToString(),
+            Message = "Update success"
+        });
     }
 }
