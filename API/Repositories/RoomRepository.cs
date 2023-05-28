@@ -7,7 +7,7 @@ using API.ViewModels.Rooms;
 
 namespace API.Repositories
 {
-    public class RoomRepository : GenericRepository<Room>, IRoomRepository
+    public class RoomRepository : BaseRepository<Room>, IRoomRepository
     {
         private readonly IEmployeeRepository _employeeRepository;
         public RoomRepository(BookingManagementDbContext context,

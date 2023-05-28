@@ -11,18 +11,19 @@ namespace API.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 
-public class BookingController : ControllerBase
+public class BookingController : BaseController<Booking, BookingVM>
 {
     private readonly IBookingRepository _bookingRepository;
     private readonly IMapper<Booking, BookingVM> _mapper;
     public BookingController(IBookingRepository bookingRepository,
-                            IMapper<Booking, BookingVM> mapper)
+                            IMapper<Booking, 
+                            BookingVM> mapper) : base(bookingRepository, mapper)
     {
         _bookingRepository = bookingRepository;
         _mapper = mapper;
     }
 
-    [HttpGet]
+   /* [HttpGet]
     public IActionResult GetAll()
     {
         var bookings = _bookingRepository.GetAll();
@@ -43,7 +44,7 @@ public class BookingController : ControllerBase
             Message = "Success",
             Data = data
         });
-    }
+    }*/
 
     [HttpGet("BookingDetail")]
     public IActionResult GetAllBookingDetail()
@@ -103,7 +104,7 @@ public class BookingController : ControllerBase
             return Ok("error");
         }
     }
-    [HttpGet("{guid}")]
+    /*[HttpGet("{guid}")]
     public IActionResult GetByGuid(Guid id)
     {
         var booking = _bookingRepository.GetByGuid(id);
@@ -192,5 +193,5 @@ public class BookingController : ControllerBase
             Status = HttpStatusCode.OK.ToString(),
             Message = "Update success"
         });
-    }
+    }*/
 }

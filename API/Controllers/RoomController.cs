@@ -11,18 +11,22 @@ using API.ViewModels.Rooms;
 using API.ViewModels.Response;
 using API.ViewModels.Universities;
 using System.Net;
+using API.Controllers;
 
 namespace WebAPI.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class RoomController : ControllerBase
+    public class RoomController : BaseController<Room, RoomVM>
     {
         private readonly IRoomRepository _roomRepository;
         private readonly IBookingRepository _bookingRepository;
         private readonly IEmployeeRepository _employeeRepository;
         private readonly IMapper<Room, RoomVM> _mapper;
-        public RoomController(IRoomRepository roomRepository, IMapper<Room, RoomVM> mapper, IBookingRepository bookingRepository, IEmployeeRepository employeeRepository)
+        public RoomController(IRoomRepository roomRepository, 
+            IMapper<Room, RoomVM> mapper, 
+            IBookingRepository bookingRepository, 
+            IEmployeeRepository employeeRepository) : base(roomRepository, mapper)
         {
             _roomRepository = roomRepository;
             _mapper = mapper;
@@ -30,8 +34,8 @@ namespace WebAPI.Controllers
             _employeeRepository = employeeRepository;
         }
 
-        [HttpGet]
-        public IActionResult GetAll()
+        /*[HttpGet]*/
+       /* public IActionResult GetAll()
         {
             var rooms = _roomRepository.GetAll();
             if (!rooms.Any())
@@ -76,7 +80,7 @@ namespace WebAPI.Controllers
                 Message = "Success",
                 Data = data
             });
-        }
+        }*/
 
         [HttpGet("CurrentlyUsedRooms")]
         public IActionResult GetCurrentlyUsedRooms()
@@ -124,7 +128,7 @@ namespace WebAPI.Controllers
             });
         }
 
-        [HttpPost]
+        /*[HttpPost]
         public IActionResult Create(RoomVM roomVM)
         {
             var roomConverted = _mapper.Map(roomVM);
@@ -194,7 +198,7 @@ namespace WebAPI.Controllers
                 Status = HttpStatusCode.OK.ToString(),
                 Message = "Update success"
             });
-        }
+        }*/
 
 
         [HttpGet("AvailableRoom")]

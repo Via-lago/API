@@ -10,26 +10,33 @@ using API.ViewModels.Universities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Identity.Client;
 using System.Net;
+using static System.Net.WebRequestMethods;
 
 namespace API.Controllers;
 [ApiController]
 [Route("api/[controller]")]
-public class AccountController : ControllerBase
+public class AccountController : BaseController<Account, AccountVM>
 {
     private readonly IAccountRepository _accountRepository;
     private readonly IMapper<Account, AccountVM> _mapper;
     private readonly IEmployeeRepository _employeeRepository;
+    private readonly IEmailService _emailService;
+ 
     
     public AccountController(IAccountRepository accountRepository,
                             IMapper<Account, AccountVM> mapper,
-                            IEmployeeRepository employeeRepository)
+                            IEmployeeRepository employeeRepository,
+                            IEmailService emailService
+                            ) : base (accountRepository, mapper)
     {
         _mapper = mapper;
         _accountRepository = accountRepository;
         _employeeRepository = employeeRepository;
+        _emailService = emailService;
+
     }
 
-    [HttpGet]
+    /*[HttpGet]
     public IActionResult GetAll()
     {
         var accounts = _accountRepository.GetAll();
@@ -73,7 +80,7 @@ public class AccountController : ControllerBase
             Message = "Success",
             Data = data
         });
-    }
+    }*/
 
     [HttpPost("Register")]
 
@@ -132,7 +139,7 @@ public class AccountController : ControllerBase
             });
         }
 
-        if (account.Password != loginVM.Password)
+        if (!Hashing.ValidatePassword(loginVM.Password,account.Password))
         {
             return BadRequest(new ResponseVM<LoginVM>
             {
@@ -151,7 +158,7 @@ public class AccountController : ControllerBase
     }
 
 
-    [HttpPost]
+    /*[HttpPost]
     public IActionResult Create(AccountVM accountVM)
     {
         var accountConverted = _mapper.Map(accountVM);
@@ -197,7 +204,7 @@ public class AccountController : ControllerBase
             Message = "Update success",
             Data = data
         });
-    }
+    }*/
 
     [HttpPost("ChangePassword")]
     public IActionResult ChangePassword(ChangePasswordVM changePasswordVM)
@@ -257,7 +264,6 @@ public class AccountController : ControllerBase
     [HttpPost("ForgotPassword" + "{email}")]
     public IActionResult UpdateResetPass(String email)
     {
-
         var getGuid = _employeeRepository.FindGuidByEmail(email);
         if (getGuid == null)
         {
@@ -286,16 +292,14 @@ public class AccountController : ControllerBase
                 {
                     Email = email,
                     Otp = isUpdated
+
                 };
+                _emailService.SetEmail(email)
+                 .SetSubject("Forgot Passowrd")
+                 .SetHtmlMessage($"Your OTP is {isUpdated}")
+                 .SendEmailAsync();
 
-                MailService mailService = new MailService();
-                mailService.WithSubject("Kode OTP")
-                           .WithBody("OTP anda adalah: " + isUpdated.ToString() + ".\n" +
-                                     "Mohon kode OTP anda tidak diberikan kepada pihak lain" + ".\n" + "Terima kasih.")
-                           .WithEmail(email)
-                           .Send();
 
-                
                 return Ok(new ResponseVM<AccountEmployeeVM>
                 {
                     Code = StatusCodes.Status200OK,
@@ -306,7 +310,7 @@ public class AccountController : ControllerBase
         }
     }
 
-    [HttpDelete("{guid}")]
+    /*[HttpDelete("{guid}")]
     public IActionResult Delete(Guid guid)
     {
         var isDeleted = _accountRepository.Delete(guid);
@@ -326,5 +330,5 @@ public class AccountController : ControllerBase
             Status = HttpStatusCode.OK.ToString(),
             Message = "Update success"
         });
-    }
+    }*/
 }

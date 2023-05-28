@@ -4,7 +4,7 @@ using API.Models;
 
 namespace API.Contracts
 {
-    public interface IRoomRepository : IGenericRepository<Room>
+    public interface IRoomRepository : IBaseRepository<Room>
     {
         IEnumerable<MasterRoomVM> GetByDate(DateTime dateTime);
         IEnumerable<RoomUsedVM> GetCurrentlyUsedRooms();

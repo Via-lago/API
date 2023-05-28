@@ -11,12 +11,12 @@ namespace API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class EducationController : ControllerBase
+public class EducationController : BaseController<Education,EducationsVM>
 {
     private readonly IEducationRepository _educationRepository;
     private readonly IMapper<Education, EducationsVM> _educationMapper;
     public EducationController(IEducationRepository educationRepository, 
-                                IMapper<Education, EducationsVM> educationMapper)
+                                IMapper<Education, EducationsVM> educationMapper) : base (educationRepository,educationMapper)
     {
         _educationRepository = educationRepository;
         _educationMapper = educationMapper;

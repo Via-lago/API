@@ -2,7 +2,7 @@
 
 namespace API.Contracts
 {
-    public interface IEducationRepository : IGenericRepository<Education>
+    public interface IEducationRepository : IBaseRepository<Education>
     {
        IEnumerable<Education> GetByUniversityId(Guid guid);
         Education GetByEmployeeId(Guid employeeId);

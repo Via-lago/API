@@ -4,7 +4,7 @@ using API.Models;
 
 namespace API.Repositories
 {
-    public class AccountRoleRepository : GenericRepository<AccountRole>, IAccountRoleRepository
+    public class AccountRoleRepository : BaseRepository<AccountRole>, IAccountRoleRepository
     {
         public AccountRoleRepository(BookingManagementDbContext context) : base(context) { }
     }

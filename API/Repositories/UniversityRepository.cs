@@ -2,10 +2,11 @@
 using API.Contracts;
 using API.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Xml.Linq;
 
 namespace API.Repositories;
 
-public class UniversityRepository : GenericRepository<University>, IUniversityRepository
+public class UniversityRepository : BaseRepository<University>, IUniversityRepository
 {
     public UniversityRepository(BookingManagementDbContext context) : base(context) { }
     public IEnumerable<University> GetByName(string name)

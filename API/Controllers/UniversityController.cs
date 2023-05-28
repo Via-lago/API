@@ -1,8 +1,8 @@
 ﻿using API.Contracts;
 using API.Models;
 using API.Repositories;
-using API.Utility;
 using API.ViewModels.Accounts;
+using API.ViewModels.Bookings;
 using API.ViewModels.Educations;
 using API.ViewModels.Response;
 using API.ViewModels.Universities;
@@ -13,136 +13,134 @@ namespace API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class UniversityController : ControllerBase
+public class UniversityController : BaseController<University, UniversityVM>
 {
     private readonly IUniversityRepository _universityRepository;
     private readonly IEducationRepository _educationRepository;
     private readonly IMapper<University, UniversityVM> _mapper;
-    private readonly IMapper<Education, EducationsVM> _educationMapper;
-    public UniversityController(IUniversityRepository universityRepository, IEducationRepository educationRepository,
-                                IMapper<University, UniversityVM> mapper, IMapper<Education, EducationsVM> educationMapper)
+    private readonly IMapper<Education, EducationsVM> _educationVMMapper;
+    public UniversityController(IUniversityRepository universityRepository, IEducationRepository educationRepository, 
+        IMapper<University, UniversityVM> mapper, IMapper<Education, 
+            EducationsVM> educationMapper) : base(universityRepository, mapper)
     {
         _universityRepository = universityRepository;
         _educationRepository = educationRepository;
         _mapper = mapper;
-        _educationMapper = educationMapper;
+        _educationVMMapper = educationMapper;
     }
 
-    [HttpGet]
-    public IActionResult GetAll()
+    [HttpGet("WithEducation")]
+    public IActionResult GetAllWithEducation()
     {
         var universities = _universityRepository.GetAll();
         if (!universities.Any())
         {
-            return NotFound(new ResponseVM<List<UniversityVM>>
-            {
-                Code = StatusCodes.Status404NotFound,
-                Status = HttpStatusCode.NotFound.ToString(),
-                Message = "Not Found"
-            });
-        }
-        var data = universities.Select(_mapper.Map).ToList();
-
-        return Ok(new ResponseVM<List<UniversityVM>>
-        {
-            Code = StatusCodes.Status200OK,
-            Status = HttpStatusCode.OK.ToString(),
-            Message = "Success",
-            Data = data
-        });
-    }
-
-    [HttpGet("{guid}")]
-    public IActionResult GetByGuid(Guid guid)
-    {
-        var university = _universityRepository.GetByGuid(guid);
-        if (university is null)
             return NotFound(new ResponseVM<UniversityVM>
             {
                 Code = StatusCodes.Status404NotFound,
                 Status = HttpStatusCode.NotFound.ToString(),
-                Message = "Not Found"
+                Message = "University not found",
+                Data = null
             });
-        var data = _mapper.Map(university);
-        return Ok(new ResponseVM<UniversityVM>
+        }
+
+        var results = new List<UniversityEducationVM>();
+        foreach (var university in universities)
+        {
+            var education = _educationRepository.GetByUniversityId(university.Guid);
+            var educationMapped = education.Select(_educationVMMapper.Map);
+
+            var result = new UniversityEducationVM
+            {
+                Guid = university.Guid,
+                Code = university.Code,
+                Name = university.Name,
+                Educations = educationMapped
+            };
+
+            results.Add(result);
+        }
+
+        return Ok(new ResponseVM<List<UniversityEducationVM>>
         {
             Code = StatusCodes.Status200OK,
             Status = HttpStatusCode.OK.ToString(),
             Message = "Success",
-            Data = data
+            Data = results
         });
     }
 
-    [HttpPost]
-    public IActionResult Create(UniversityVM universityVM)
-    {
-        var universityConverted = _mapper.Map(universityVM);
-
-        var result = _universityRepository.Create(universityConverted);
-        if (result is null)
+    /*    [HttpGet]
+        public IActionResult GetAll()
         {
-            return BadRequest(new ResponseVM<UniversityVM>
+            var universities = _universityRepository.GetAll();
+            if (!universities.Any())
             {
-                Code = StatusCodes.Status400BadRequest,
-                Status = HttpStatusCode.BadRequest.ToString(),
-                Message = "Create failed"
-            });
+                return NotFound();
+            }
+
+            *//*var univeritiesConverted = new List<UniversityVM>();
+            foreach (var university in universities) {
+                var result = UniversityVM.ToVM(university);
+                univeritiesConverted.Add(result);
+            }*//*
+
+            var data = universities.Select(_mapper.Map).ToList();
+
+            return Ok(data);
         }
 
-        var resultConverted = _mapper.Map(result);
-        return Ok(new ResponseVM<UniversityVM>
+        [HttpGet("{guid}")]
+        public IActionResult GetByGuid(Guid guid)
         {
-            Code = StatusCodes.Status200OK,
-            Status = HttpStatusCode.OK.ToString(),
-            Message = "Create success",
-            Data = resultConverted
-        });
-    }
-
-    [HttpPut]
-    public IActionResult Update(UniversityVM universityVM)
-    {
-        var universityConverted = _mapper.Map(universityVM);
-        var isUpdated = _universityRepository.Update(universityConverted);
-        if (!isUpdated)
-        {
-            return BadRequest(new ResponseVM<UniversityVM>
+            var university = _universityRepository.GetByGuid(guid);
+            if (university is null)
             {
-                Code = StatusCodes.Status400BadRequest,
-                Status = HttpStatusCode.BadRequest.ToString(),
-                Message = "Update failed"
-            });
+                return NotFound();
+            }
+
+            var data = _mapper.Map(university);
+
+            return Ok(data);
         }
 
-        var data = _mapper.Map(universityConverted);
-        return Ok(new ResponseVM<UniversityVM>
+        [HttpPost]
+        public IActionResult Create(UniversityVM universityVM)
         {
-            Code = StatusCodes.Status200OK,
-            Status = HttpStatusCode.OK.ToString(),
-            Message = "Update success",
-            Data = data
-        });
-    }
+            var universityConverted = _mapper.Map(universityVM);
+
+            var result = _universityRepository.Create(universityConverted);
+            if (result is null)
+            {
+                return BadRequest();
+            }
+
+            return Ok(result);
+        }
+
+        [HttpPut]
+        public IActionResult Update(UniversityVM universityVM)
+        {
+            var universityConverted = _mapper.Map(universityVM);
+
+            var isUpdated = _universityRepository.Update(universityConverted);
+            if (!isUpdated)
+            {
+                return BadRequest();
+            }
+
+            return Ok();
+        }
 
         [HttpDelete("{guid}")]
-    public IActionResult Delete(Guid guid)
-    {
-        var isDeleted = _universityRepository.Delete(guid);
-        if (!isDeleted)
+        public IActionResult Delete(Guid guid)
         {
-            return BadRequest(new ResponseVM<UniversityVM>
+            var isDeleted = _universityRepository.Delete(guid);
+            if (!isDeleted)
             {
-                Code = StatusCodes.Status400BadRequest,
-                Status = HttpStatusCode.BadRequest.ToString(),
-                Message = "Update failed"
-            });
-        }
+                return BadRequest();
+            }
 
-        return Ok(new ResponseVM<UniversityVM>
-        {
-            Code = StatusCodes.Status200OK,
-            Status = HttpStatusCode.OK.ToString(),
-            Message = "Update success"
-        });
-    }
+            return Ok();
+        }*/
 }

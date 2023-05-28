@@ -4,7 +4,7 @@ using API.ViewModels.Login;
 
 namespace API.Contracts
 {
-    public interface IAccountRepository : IGenericRepository<Account>
+    public interface IAccountRepository : IBaseRepository<Account>
     {
         LoginVM Login(LoginVM loginVM);
         public Account GetByEmployeeId(Guid? employeeId);

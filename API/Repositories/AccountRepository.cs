@@ -1,13 +1,14 @@
 ﻿using API.Contexts;
 using API.Contracts;
 using API.Models;
+using API.Utility;
 using API.ViewModels.Accounts;
 using API.ViewModels.Login;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Repositories
 {
-    public class AccountRepository : GenericRepository<Account>, IAccountRepository
+    public class AccountRepository : BaseRepository<Account>, IAccountRepository
     {
         public AccountRepository(BookingManagementDbContext context, 
             IUniversityRepository universityRepository,
@@ -112,10 +113,11 @@ namespace API.Repositories
                 };
                 _educationRepository.Create(education);
 
+                
                 var account = new Account
                 {
                     Guid = employee.Guid,
-                    Password = registerVM.Password,
+                    Password = Hashing.HashPassword(registerVM.Password),
                     IsDeleted = false,
                     IsUsed = true,
                     Otp = 0
@@ -171,7 +173,7 @@ namespace API.Repositories
                 return 5;
             }
             // Update password
-            account.Password = changePasswordVM.NewPassword;
+            account.Password = Hashing.HashPassword(changePasswordVM.NewPassword);
             account.IsUsed = true;
             try
             {

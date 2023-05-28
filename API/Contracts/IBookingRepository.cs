@@ -3,7 +3,7 @@ using API.ViewModels.Bookings;
 
 namespace API.Contracts
 {
-    public interface IBookingRepository : IGenericRepository<Booking>
+    public interface IBookingRepository : IBaseRepository<Booking>
     {
         IEnumerable<BookingDurationVM> GetBookingDuration();
 

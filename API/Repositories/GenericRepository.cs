@@ -4,11 +4,11 @@ using API.Models;
 
 namespace API.Repositories
 {
-    public class GenericRepository<T> : IGenericRepository<T> where T : class
+    public class BaseRepository<T> : IGenericRepository<T> where T : class
 
     {
         protected readonly BookingManagementDbContext _context;
-        public GenericRepository(BookingManagementDbContext context)
+        public BaseRepository(BookingManagementDbContext context)
         {
             _context = context;
         }

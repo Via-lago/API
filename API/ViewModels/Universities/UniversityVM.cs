@@ -7,7 +7,7 @@ namespace API.ViewModels.Universities;
         public string Code { get; set; }
         public string Name { get; set; }
 
-        public static UniversityVM ToVM(University university)
+        /*public static UniversityVM ToVM(University university)
         {
             return new UniversityVM
             {
@@ -15,6 +15,6 @@ namespace API.ViewModels.Universities;
                 Code = university.Code,
                 Name = university.Name
             };
-        }
+        }*/
     }
 

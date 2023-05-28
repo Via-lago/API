@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace API.Repositories
 {
-    public class EducationRepository : GenericRepository<Education>, IEducationRepository
+    public class EducationRepository : BaseRepository<Education>, IEducationRepository
     {
         public EducationRepository(BookingManagementDbContext context) : base(context) { }
         public IEnumerable<Education> GetByUniversityId(Guid universityId)

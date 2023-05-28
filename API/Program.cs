@@ -6,7 +6,12 @@ using API.Utility;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+//Add Email services to the container
 
+builder.Services.AddTransient<IEmailService, EmailService>(_ => new EmailService(
+          smtpServer: builder.Configuration["Email:SmtpServer"],
+          smtpPort: int.Parse(builder.Configuration["Email:SmtpPort"]),
+          fromEmailAddress: builder.Configuration["Email:FromEmailAddress"]));
 // Add services to the container.
 
 builder.Services.AddControllers();

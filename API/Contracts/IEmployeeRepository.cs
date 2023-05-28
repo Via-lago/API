@@ -5,7 +5,7 @@ using API.ViewModels.Employees;
 
 namespace API.Contracts
 {
-    public interface IEmployeeRepository : IGenericRepository<Employee>
+    public interface IEmployeeRepository : IBaseRepository<Employee>
     {
         public Guid? FindGuidByEmail(string email);
         IEnumerable<MasterEmployeeVM> GetAllMasterEmployee();

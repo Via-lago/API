@@ -2,7 +2,7 @@
 
 namespace API.Contracts;
 
-public interface IUniversityRepository : IGenericRepository<University>
+public interface IUniversityRepository : IBaseRepository<University>
 {
     IEnumerable<University> GetByName(string name);
     University CreateWithValidate(University university);

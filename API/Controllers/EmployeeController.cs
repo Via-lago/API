@@ -20,7 +20,7 @@ namespace API.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 
-public class EmployeeController : ControllerBase
+public class EmployeeController : BaseController<Employee,EmployeeVM>
 {
     private readonly IEmployeeRepository _emplloyeeRepository;
     private readonly IAccountRepository _accountRepository;
@@ -32,6 +32,7 @@ public class EmployeeController : ControllerBase
                                 IAccountRepository accountRepository,
                                 IEducationRepository educationRepository,
                                 IUniversityRepository universityRepository)
+                                : base (employeeRepository,mapper)
     {
         _emplloyeeRepository = employeeRepository;
         _mapper = mapper;
