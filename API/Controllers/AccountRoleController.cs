@@ -23,7 +23,7 @@ public class AccountRoleController : BaseController<AccountRole,AccountRoleVM>
         _mapper = mapper;
     }
 
-    [HttpGet]
+    /*[HttpGet]
     public IActionResult GetAll()
     {
         var accountrole = _accountroleRepository.GetAll();
@@ -138,6 +138,6 @@ public class AccountRoleController : BaseController<AccountRole,AccountRoleVM>
             Status = HttpStatusCode.OK.ToString(),
             Message = "Update success"
         });
-    }
+    }*/
 }
 

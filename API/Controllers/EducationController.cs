@@ -22,7 +22,7 @@ public class EducationController : BaseController<Education,EducationsVM>
         _educationMapper = educationMapper;
     }
 
-    [HttpGet]
+  /*  [HttpGet]
     public IActionResult GetAll()
     {
         var educations = _educationRepository.GetAll();
@@ -138,5 +138,5 @@ public class EducationController : BaseController<Education,EducationsVM>
             Status = HttpStatusCode.OK.ToString(),
             Message = "Update success"
         });
-    }
+    }*/
 }

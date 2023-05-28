@@ -85,7 +85,7 @@ public class EmployeeController : BaseController<Employee,EmployeeVM>
         });
     }
 
-    [HttpGet("{guid}")]
+    /*[HttpGet("{guid}")]
     public IActionResult GetByGuid(Guid guid)
     {
         var employee = _emplloyeeRepository.GetByGuid(guid);
@@ -176,6 +176,6 @@ public class EmployeeController : BaseController<Employee,EmployeeVM>
             Status = HttpStatusCode.OK.ToString(),
             Message = "Update success"
         });
-    }
+    }*/
 
 }

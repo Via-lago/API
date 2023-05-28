@@ -25,7 +25,7 @@ public class RoleController : BaseController<Role,RolesVM>
         _mapper = mapper;
     }
 
-    [HttpGet]
+   /* [HttpGet]
     public IActionResult GetAll()
     {
         var roles = _roleRepository.GetAll();
@@ -140,6 +140,6 @@ public class RoleController : BaseController<Role,RolesVM>
             Status = HttpStatusCode.OK.ToString(),
             Message = "Update success"
         });
-    }
+    }*/
 
 }
