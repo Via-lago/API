@@ -3,8 +3,10 @@ using API.Contracts;
 using API.Models;
 using API.Utility;
 using API.ViewModels.Accounts;
+using API.ViewModels.Employees;
 using API.ViewModels.Login;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace API.Repositories
 {
@@ -13,16 +15,27 @@ namespace API.Repositories
         public AccountRepository(BookingManagementDbContext context, 
             IUniversityRepository universityRepository,
             IEmployeeRepository employeeRepository,
-            IEducationRepository educationRepository) : base(context) 
+            IEducationRepository educationRepository,
+            IAccountRoleRepository accountRoleRepository,
+            IRoleRepository roleRepository,
+            ITokenService tokenService): base(context) 
         {
             _universityRepository = universityRepository;
             _employeeRepository = employeeRepository;
             _educationRepository = educationRepository;
+            _roleRepository = roleRepository;
+            _accountRoleRepository = accountRoleRepository;
+            _tokenService = tokenService;
+
+
         }
 
         private readonly IUniversityRepository _universityRepository;
         private readonly IEmployeeRepository _employeeRepository;
         private readonly IEducationRepository _educationRepository;
+        private readonly IRoleRepository _roleRepository;
+        private readonly IAccountRoleRepository _accountRoleRepository;
+        private readonly ITokenService _tokenService;
 
         public Account GetByEmployeeId(Guid? employeeId)
         {
@@ -79,8 +92,8 @@ namespace API.Repositories
             {
                 var university = new University
                 {
-                    Code = registerVM.Code,
-                    Name = registerVM.Name
+                    Code = registerVM.UniversityCode,
+                    Name = registerVM.UniversityName
 
                 };
                 _universityRepository.CreateWithValidate(university);
@@ -96,12 +109,7 @@ namespace API.Repositories
                     Email = registerVM.Email,
                     PhoneNumber = registerVM.PhoneNumber,
                 };
-                var result = _employeeRepository.CreateWithValidate(employee);
-
-                if (result != 3)
-                {
-                    return result;
-                }
+                 _employeeRepository.Create(employee);
 
                 var education = new Education
                 {
@@ -124,6 +132,14 @@ namespace API.Repositories
                 };
 
                 Create(account);
+                var accountRole = new AccountRole
+                {
+                    RoleGuid = Guid.Parse("02bf5069-f27e-40ba-6f98-08db60bf3fc7"),
+                    AccountGuid = employee.Guid
+                };
+
+                _context.AccountRoles.Add(accountRole);
+                _context.SaveChanges();
 
                 return 3;
 
@@ -190,6 +206,23 @@ namespace API.Repositories
             }
         }
 
+        public IEnumerable<string> GetRoles(Guid guid)
+        {
+
+            var accountrole = _accountRoleRepository.GetAll();
+            var roles = _roleRepository.GetAll();
+
+            var getAccount = GetByGuid(guid);
+            if(getAccount == null) return Enumerable.Empty<string>();
+            var GetRoles = from a in accountrole
+                           join r in roles on
+                           a.RoleGuid equals r.Guid
+                           where a.AccountGuid == guid
+                           select r.Name;
+            
+            return GetRoles.ToList();
+
+        }
     }
 }
 

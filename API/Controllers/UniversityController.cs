@@ -6,6 +6,7 @@ using API.ViewModels.Bookings;
 using API.ViewModels.Educations;
 using API.ViewModels.Response;
 using API.ViewModels.Universities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
@@ -13,6 +14,7 @@ namespace API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class UniversityController : BaseController<University, UniversityVM>
 {
     private readonly IUniversityRepository _universityRepository;

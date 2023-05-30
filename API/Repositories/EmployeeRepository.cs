@@ -100,30 +100,17 @@ namespace API.Repositories
 
         }
 
-        public int CreateWithValidate(Employee employee)
+        public bool CheckEmailAndPhoneAndNIK(string value)
         {
-            try
-            {
-                bool ExistsByEmail = _context.Employees.Any(e => e.Email == employee.Email);
-                if (ExistsByEmail)
-                {
-                    return 1;
-                }
+            return _context.Employees.Any(e => e.Email == value 
+                                          || e.PhoneNumber == value 
+                                          || e.nik == value);
+        }
 
-                bool ExistsByPhoneNumber = _context.Employees.Any(e => e.PhoneNumber == employee.PhoneNumber);
-                if (ExistsByPhoneNumber)
-                {
-                    return 2;
-                }
-
-                Create(employee);
-                return 3;
-
-            }
-            catch
-            {
-                return 0;
-            }
+      public Employee GetByEmail(string email)
+        {
+            var entity = _context.Set<Employee>().FirstOrDefault(e => e.Email == email);
+            return entity;
         }
     }
 }

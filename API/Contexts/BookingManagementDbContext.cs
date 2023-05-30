@@ -1,5 +1,6 @@
 ﻿
 using API.Models;
+using API.Utility;
 using Microsoft.EntityFrameworkCore;
 namespace API.Contexts
 {
@@ -22,6 +23,28 @@ namespace API.Contexts
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
+
+            builder.Entity<Role>().HasData(new Role
+            {
+                Guid =Guid.Parse("02bf5069-f27e-40ba-6f98-08db60bf3fc7"),
+                Name = nameof(RoleLevel.User),
+                CreatedDate = DateTime.Now,
+                ModifiedDate = DateTime.Now
+            },
+            new Role
+            {
+                Guid = Guid.Parse("02bf5069-f27e-30ba-6f98-08db60bf3fc7"),
+                Name = nameof(RoleLevel.Manager),
+                CreatedDate = DateTime.Now,
+                ModifiedDate = DateTime.Now
+            },
+            new Role
+            {
+                Guid = Guid.Parse("02bf5069-f27e-20ba-6f98-08db60bf3fc7"),
+                Name = nameof(RoleLevel.Admin),
+                CreatedDate = DateTime.Now,
+                ModifiedDate = DateTime.Now
+            });
 
             builder.Entity<Employee>().HasIndex(e => new { e.nik,e.Email, e.PhoneNumber})
                 .IsUnique();

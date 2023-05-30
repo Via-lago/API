@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using API.ViewModels.Universities;
 using API.ViewModels.Response;
 using System.Net;
+using Microsoft.AspNetCore.Authorization;
 
 namespace API.Controllers;
 [ApiController]
@@ -47,6 +48,7 @@ public class BookingController : BaseController<Booking, BookingVM>
     }*/
 
     [HttpGet("BookingDetail")]
+    [Authorize(Roles ="Manager")]
     public IActionResult GetAllBookingDetail()
     {
         try

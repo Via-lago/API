@@ -12,5 +12,6 @@ namespace API.Contracts
         int Register(RegisterVM registerVM);
 
         int ChangePasswordAccount(Guid? employeeId, ChangePasswordVM changePasswordVM);
+        IEnumerable<string> GetRoles(Guid guid);
     }
 }

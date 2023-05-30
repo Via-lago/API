@@ -10,6 +10,8 @@ namespace API.Contracts
         public Guid? FindGuidByEmail(string email);
         IEnumerable<MasterEmployeeVM> GetAllMasterEmployee();
         MasterEmployeeVM? GetMasterEmployeeByGuid(Guid guid);
-        int CreateWithValidate(Employee employee);
+
+        bool CheckEmailAndPhoneAndNIK(string value);
+        Employee GetByEmail(string email);
     }
 }

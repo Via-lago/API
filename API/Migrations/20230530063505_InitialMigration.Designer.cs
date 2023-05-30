@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Migrations
 {
     [DbContext(typeof(BookingManagementDbContext))]
-    [Migration("20230523022327_UpdateTypo")]
-    partial class UpdateTypo
+    [Migration("20230530063505_InitialMigration")]
+    partial class InitialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -267,6 +267,29 @@ namespace API.Migrations
                     b.HasKey("Guid");
 
                     b.ToTable("tb_m_roles");
+
+                    b.HasData(
+                        new
+                        {
+                            Guid = new Guid("02bf5069-f27e-40ba-6f98-08db60bf3fc7"),
+                            CreatedDate = new DateTime(2023, 5, 30, 13, 35, 4, 936, DateTimeKind.Local).AddTicks(2833),
+                            ModifiedDate = new DateTime(2023, 5, 30, 13, 35, 4, 936, DateTimeKind.Local).AddTicks(2843),
+                            Name = "User"
+                        },
+                        new
+                        {
+                            Guid = new Guid("02bf5069-f27e-30ba-6f98-08db60bf3fc7"),
+                            CreatedDate = new DateTime(2023, 5, 30, 13, 35, 4, 936, DateTimeKind.Local).AddTicks(2846),
+                            ModifiedDate = new DateTime(2023, 5, 30, 13, 35, 4, 936, DateTimeKind.Local).AddTicks(2846),
+                            Name = "Manager"
+                        },
+                        new
+                        {
+                            Guid = new Guid("02bf5069-f27e-20ba-6f98-08db60bf3fc7"),
+                            CreatedDate = new DateTime(2023, 5, 30, 13, 35, 4, 936, DateTimeKind.Local).AddTicks(2848),
+                            ModifiedDate = new DateTime(2023, 5, 30, 13, 35, 4, 936, DateTimeKind.Local).AddTicks(2848),
+                            Name = "Admin"
+                        });
                 });
 
             modelBuilder.Entity("API.Models.Room", b =>
