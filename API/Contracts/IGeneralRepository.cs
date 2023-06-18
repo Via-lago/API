@@ -1,7 +1,7 @@
 ﻿using API.Models;
 namespace API.Contracts
 {
-    public interface IGenericRepository<T>
+    public interface IGeneralRepository<T>
     {
         T? Create(T item);
         bool Update(T item);

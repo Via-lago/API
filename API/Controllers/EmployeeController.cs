@@ -54,13 +54,16 @@ public class EmployeeController : BaseController<Employee,EmployeeVM>
                 Message = "Not Found"
             });
         }
-        return Ok(new ResponseVM<List<MasterEmployeeVM>>
+
+        return Ok(new ResponseVM<IEnumerable<MasterEmployeeVM>>
         {
             Code = StatusCodes.Status200OK,
             Status = HttpStatusCode.OK.ToString(),
-            Message = "Success"
+            Message = "Data ditampilkan",
+            Data = masterEmployees
+
         });
-   }
+    }
 
     [HttpGet("GetMasterEmployeeByGuid")]
     public IActionResult GetMasterEmployeeByGuid(Guid guid)

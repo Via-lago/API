@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <Folder Include="Migration\" />
+    <Folder Include="NewFolder\" />
     <Folder Include="View\" />
   </ItemGroup>
 
